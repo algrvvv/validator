@@ -33,3 +33,23 @@ err := validator.Validate(mockUser{
 })
 
 ```
+
+### Использование своих сообщений об ошибке
+
+```go
+// Требуется создать структуру, которая имплементирует IMessage
+type IMessages interface {
+    Required(field string) string
+    Min(field string, min int) string
+    Email(field string) string
+}
+
+// где field - поле, которое не прошло проверку
+// А использовать вот так:
+err := validator.ValidateWithMessage(mockUser{
+    Email:    "example@example.com",
+    Password: "p4ssw0rd",
+}, &mockMessages{})
+```
+
+Более подробный пример можно увидеть в `validator_test.go`

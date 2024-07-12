@@ -11,6 +11,11 @@ type mockUser struct {
 	Password string `json:"password" validate:"required,min=8"`
 }
 
+type mockWrongUser struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=something"`
+}
+
 type mockMessages struct{}
 
 func (m mockMessages) Required(field string) string {
@@ -85,4 +90,22 @@ func TestValidate(t *testing.T) {
 			t.Log(err)
 		}
 	})
+
+	t.Run("test should be panic if min value is not int type", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("should be panic")
+			} else {
+				t.Log("Паника перехвачена: ", r)
+			}
+		}()
+
+		err := validator.Validate(mockWrongUser{
+			Email:    "example@example.com",
+			Password: "p4ssw0rd",
+		})
+
+		t.Log(err)
+	})
+
 }

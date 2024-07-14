@@ -8,14 +8,14 @@ import (
 	"github.com/algrvvv/validator/types"
 )
 
+// Validate function for structure validation
+// uses default error messages
 func Validate(s interface{}) error {
-	err := ValidateWithMessage(s, &types.DefaultMessages{})
-	if err != nil {
-		return err
-	}
-	return nil
+	return ValidateWithMessage(s, &types.DefaultMessages{})
 }
 
+// ValidateWithMessage function for structure validation with messages
+// uses IMessages implementation for show custom error messages
 func ValidateWithMessage(s interface{}, m types.IMessages) error {
 	t := reflect.TypeOf(s)
 	v := reflect.ValueOf(s)

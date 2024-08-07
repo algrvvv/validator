@@ -44,6 +44,10 @@ func ValidateWithMessage(s interface{}, m types.IMessages) error {
 				if err := rules.Min(field.Name, tag, value.String(), m); err != nil {
 					return err
 				}
+			case strings.HasPrefix(tag, "max="):
+				if err := rules.Max(field.Name, tag, value.String(), m); err != nil {
+					return err
+				}
 			}
 		}
 	}

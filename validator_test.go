@@ -2,17 +2,18 @@ package validator_test
 
 import (
 	"fmt"
-	"github.com/algrvvv/validator"
 	"testing"
+
+	"github.com/algrvvv/validator"
 )
 
 type mockUser struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+	Password string `json:"password" validate:"required,min=8,max=12"`
 }
 
 type mockWrongUser struct {
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email" validate:"required,email,max=l0l"`
 	Password string `json:"password" validate:"required,min=something"`
 }
 
@@ -26,11 +27,24 @@ func (m mockMessages) Min(field string, min int) string {
 	return fmt.Sprintf("The length of the field %s must be at least %d ", field, min)
 }
 
+func (m mockMessages) Max(field string, max int) string {
+	return fmt.Sprintf("The length of the %s field must not be greater than %d", field, max)
+}
+
 func (m mockMessages) Email(field string) string {
 	return fmt.Sprintf("The %s field must match the mail format", field)
 }
 
 func TestValidate(t *testing.T) {
+	t.Run("test should be return err if struct does not contains fields", func(t *testing.T) {
+		err := validator.Validate(mockUser{})
+
+		if err == nil {
+			t.Errorf("should return error")
+		}
+		t.Log(err)
+	})
+
 	t.Run("should return error if email is empty", func(t *testing.T) {
 		err := validator.Validate(mockUser{
 			Email:    "",
@@ -91,21 +105,28 @@ func TestValidate(t *testing.T) {
 		}
 	})
 
-	t.Run("test should be panic if min value is not int type", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("should be panic")
-			} else {
-				t.Log("Паника перехвачена: ", r)
-			}
-		}()
-
+	t.Run("test should be return error if min or max values is not int type", func(t *testing.T) {
 		err := validator.Validate(mockWrongUser{
 			Email:    "example@example.com",
 			Password: "p4ssw0rd",
 		})
 
+		if err == nil {
+			t.Error("error should not be nil")
+		}
 		t.Log(err)
 	})
 
+	t.Run("test should be return nil if field passed max validation rules", func(t *testing.T) {
+		err := validator.Validate(mockUser{
+			Email:    "example@example.com",
+			Password: "p4ssw0rd",
+		})
+
+		if err != nil {
+			t.Error("error should be nil")
+		}
+
+		t.Log(err)
+	})
 }

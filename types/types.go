@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type IMessages interface {
 	// Required method with a message when there is an error checking whether a field is required
@@ -14,6 +17,9 @@ type IMessages interface {
 
 	// Email method that sends a message when there is a field validation error with the mail format
 	Email(field string) string
+
+	// In method that sends a message when the value is not one of the options
+	In(field string, in []string) string
 }
 
 type DefaultMessages struct {
@@ -33,4 +39,9 @@ func (d DefaultMessages) Max(field string, max int) string {
 
 func (d DefaultMessages) Email(field string) string {
 	return fmt.Sprintf("Поле %s должно соответствовать формату почты", field)
+}
+
+func (d DefaultMessages) In(field string, in []string) string {
+	inStr := strings.Join(in, " либо ")
+	return fmt.Sprintf("Поле %s должно иметь значение %s", field, inStr)
 }

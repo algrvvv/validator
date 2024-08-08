@@ -2,6 +2,7 @@ package validator_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/algrvvv/validator"
@@ -15,6 +16,11 @@ type mockUser struct {
 type mockWrongUser struct {
 	Email    string `json:"email" validate:"required,email,max=l0l"`
 	Password string `json:"password" validate:"required,min=something"`
+}
+
+type mockProduct struct {
+	Name string `json:"name" validate:"required"`
+	Type string `json:"type" validate:"required,in:1-2-something"`
 }
 
 type mockMessages struct{}
@@ -33,6 +39,11 @@ func (m mockMessages) Max(field string, max int) string {
 
 func (m mockMessages) Email(field string) string {
 	return fmt.Sprintf("The %s field must match the mail format", field)
+}
+
+func (m mockMessages) In(field string, in []string) string {
+	inStr := strings.Join(in, " or ")
+	return fmt.Sprintf("Field %s must have value %s", field, inStr)
 }
 
 func TestValidate(t *testing.T) {
@@ -127,6 +138,30 @@ func TestValidate(t *testing.T) {
 			t.Error("error should be nil")
 		}
 
+		t.Log(err)
+	})
+
+	t.Run("test should be return error if 'in' rule not passed validation", func(t *testing.T) {
+		err := validator.Validate(mockProduct{
+			Name: "example",
+			Type: "9",
+		})
+
+		if err == nil {
+			t.Error("error should not be nil")
+		}
+		t.Log(err)
+	})
+
+	t.Run("test should be return nil if 'in' rule passed validation", func(t *testing.T) {
+		err := validator.Validate(mockProduct{
+			Name: "example",
+			Type: "something",
+		})
+
+		if err != nil {
+			t.Error("error should be nil")
+		}
 		t.Log(err)
 	})
 }
